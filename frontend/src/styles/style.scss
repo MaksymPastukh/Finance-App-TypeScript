@@ -1,0 +1,73 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import "abstract/_mixin";
+@import "abstract/_toggle";
+@import "auth/_auth";
+@import "abstract/_button";
+@import "abstract/_popup";
+@import "layout/_side-bar";
+@import "layout/_home";
+@import "layout/_income";
+@import "layout/_expense";
+@import "layout/operations";
+
+@font-face {
+  font-family: 'Roboto-Regular';
+  src: url('../assets/fonts/Roboto-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Roboto-Medium';
+  src: url('../assets/fonts/Roboto-Medium.ttf');
+  font-weight: bold;
+}
+
+html {
+  font-size: 62.5%;
+  position: relative;
+
+  //@include respond(Laptop-l) {
+  //  font-size: 60.25%;
+  //}
+  @include respond(Laptop) {
+    font-size: 57.25%;
+  }
+
+  @include respond(Laptop-s) {
+    font-size: 56%;
+  }
+
+  @include respond(tab-land) {
+    font-size: 55%;
+  }
+
+  @include respond(tab-port-s) {
+    font-size: 54%;
+  }
+
+  @include respond(tab-port) {
+    font-size: 52%;
+  }
+
+  //@include respond(tab-s) {
+  //  font-size: 49%;
+  //}
+
+  @include respond(phone) {
+    font-size: 44%;
+  }
+}
+
+body {
+  font-family: 'Roboto-Regular', sans-serif;
+  overflow-x: hidden;
+}
+
+.layout {
+  display: flex;
+
+  @include respond(tab-port) {
+    flex-direction: column
+  }
+}

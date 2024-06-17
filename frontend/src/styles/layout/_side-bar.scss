@@ -1,0 +1,274 @@
+@import "../abstract/_mixin";
+
+.side-bar {
+  max-width: 23rem;
+  min-height: 100vh;
+  border-right: 1px solid #d9d9d9;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+
+  @include respond(Laptop-s) {
+    width: 34rem;
+  }
+
+  @include respond(tab-port) {
+
+    border: none;
+    max-width: 100%;
+    padding: 2rem;
+    width: 100%;
+    min-height: 100%;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .logo {
+    padding: 4rem 7.1rem 2rem 5rem;
+    border-bottom: 1px solid #d9d9d9;
+
+    @include respond(tab-port) {
+      padding: 0 0 2rem 0;
+      border: none;
+      border-bottom: 1px solid #d9d9d9;
+
+    }
+
+    a {
+      img {
+        max-width: 100%;
+
+        @include respond(Laptop-s) {
+          max-width: 126%;
+        }
+
+        @include respond(tab-port) {
+          max-width: 100%;
+        }
+      }
+    }
+  }
+
+  .test {
+    @include respond(tab-port) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 4rem;
+      border-bottom: 1px solid #d9d9d9;
+
+    }
+
+    @include respond(phone) {
+      flex-direction: column-reverse;
+    }
+
+    .navigation {
+      margin: 6rem 0 61rem 0;
+      position: relative;
+      display: inline-block;
+      @include respond(tab-land) {
+        margin-bottom: 114rem;
+      }
+
+
+      @include respond(tab-port-s) {
+        margin-bottom: 118rem;
+      }
+
+      @include respond(tab-port) {
+        margin: 0;
+        display: flex;
+      }
+
+      @include respond(phone) {
+        padding-top: 2rem;
+        border-top: 1px solid #d9d9d9;
+      }
+
+
+      ul {
+        list-style: none;
+
+
+        .navigation-item {
+          border-radius: 5px;
+          transition: .2s ease;
+
+          &:hover {
+            background: #0d6efd;
+
+            a, .toggle {
+              color: white;
+
+              svg {
+                transition: 0.3s ease;
+
+                path {
+                  transition: fill 0.3s ease;
+                  fill: white;
+                }
+              }
+
+              .rotate {
+                transform: rotate(90deg);
+              }
+            }
+          }
+
+
+          &:last-child {
+            border-radius: 5px 5px 0 0;
+          }
+
+          a, .toggle {
+            display: flex;
+            min-width: 17.8rem;
+            height: 4rem;
+            padding: 1rem;
+            text-decoration: none;
+            align-items: center;
+            color: #052c65;
+            font-size: 14px;
+
+            img {
+              margin-right: 1rem;
+            }
+          }
+        }
+
+        .selector {
+          .toggle {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+
+            svg {
+              margin-left: 7rem;
+            }
+          }
+
+          .select {
+            display: none;
+            position: absolute;
+            border: 1px solid #0d6efd;
+            border-radius: 0 0 5px 5px;
+            background: white;
+            z-index: 1;
+
+
+            a {
+              color: #052c65;
+              min-width: 17.6rem;
+
+              @include respond(tab-port) {
+                width: 19rem;
+
+
+              }
+
+              @include respond(phone) {
+                width: 22rem;
+
+
+              }
+
+              &:hover {
+                background-color: #0d6efd;
+                color: white;
+
+              }
+
+              &:last-child {
+                border-radius: 0 0 3px 3px;
+              }
+            }
+          }
+
+          &:hover > .select {
+            display: block;
+          }
+        }
+
+
+      }
+    }
+
+
+    .balance-profile-container {
+      width: 22.9rem;
+      @include respond(tab-port) {
+        display: flex;
+        flex-direction: column-reverse;
+        width: 12.9rem;
+
+      }
+      @include respond(phone) {
+        margin: 0 0 3rem 0;
+        width: 21.9rem;
+      }
+
+      .balance {
+        width: 100%;
+        color: #052c65;
+        padding: 0 0 2rem 2rem;
+        font-size: 14px;
+        cursor: pointer;
+
+        span {
+          margin-left: 5px;
+          color: #0d6efd;
+          font-size: 14px;
+        }
+
+        @include respond(tab-port) {
+          padding: 1rem 0 0 0;
+          border-top: 1px solid #d9d9d9;
+        }
+
+
+        @include respond(phone) {
+          border: none;
+        }
+
+
+      }
+
+
+
+      .profile {
+        width: 100%;
+        border-top: 1px solid #d9d9d9;
+        padding: 2rem 3rem 4rem 2rem;
+        font-size: 14px;
+        color: #052c65;
+        display: flex;
+        align-items: center;
+
+        img {
+          margin-right: 1.6rem;
+
+          @include respond(tab-port) {
+            margin: 0 0 1rem 0;
+
+          }
+        }
+
+        @include respond(tab-port) {
+          display: flex;
+          flex-direction: column;
+          border: none;
+          padding: 0 0 1rem 0;
+        }
+        @include respond(phone) {
+          margin-bottom: 3rem;
+        }
+      }
+    }
+  }
+
+
+}

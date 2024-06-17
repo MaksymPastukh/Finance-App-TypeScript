@@ -1,0 +1,40 @@
+@import "../abstract/_mixin";
+
+
+.button {
+  border-radius: .5rem;
+  padding: .6rem;
+  width: 39.7rem;
+  height: 3.8rem;
+  background: #0d6efd;
+  line-height: normal;
+  font-size: 17px;
+  font-family: 'Roboto-Medium', sans-serif;
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  transition: 0.4s ease;
+  text-decoration: none;
+
+}
+
+
+.create {
+  color: #ced4da;
+  font-size: 28px;
+  padding: 2.4rem 16.8rem;
+  border: .1rem solid #ced4da;
+  border-radius: 1.2rem;
+  max-width: 35.7rem;
+  height: 12.1rem;
+
+  @include respond(tab-port) {
+    height: 14.1rem;
+  }
+}
+
+.button:disabled {
+  background-color: #ccc;
+  color: #fff;
+  cursor: not-allowed;
+}

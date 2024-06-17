@@ -1,0 +1,139 @@
+@import "../abstract/_mixin";
+
+.expense {
+  margin: 10rem 0 0 6rem;
+
+  @include respond(tab-port) {
+    margin: 6rem 2rem;
+  }
+
+  .expense-title {
+    line-height: normal;
+    font-size: 40px;
+    color: #052c65;
+
+    @include respond(tab-port) {
+      font-size: 30px;
+    }
+  }
+
+  .expense-items {
+    margin-top: 4rem;
+    display: flex;
+    flex-wrap: wrap;
+
+
+    .expense-item {
+      border: .1rem solid #ced4da;
+      border-radius: 1.2rem;
+      width: 35.2rem;
+      height: 12.1rem;
+      padding: 2rem 9.5rem 2rem 2rem;
+      margin-right: 2rem;
+      margin-bottom: 2rem;
+
+      @include respond(tab-port) {
+        height: 14.1rem;
+      }
+
+      .expense-item-title {
+        font-size: 28px;
+        line-height: normal;
+        color: #290661;
+        margin-bottom: 1rem;
+
+        @include respond(tab-port) {
+          margin-bottom: 2rem;
+          font-size: 24px;
+        }
+      }
+
+      .button {
+        width: 12.8rem;
+        background: #0d6efd;
+        text-align: center;
+
+        font-family: 'Roboto-Regular', sans-serif;
+
+        &.edit-category{
+          width: 12.8rem;
+          background: #0d6efd;
+          margin-left: 0;
+        }
+      }
+
+      .button {
+        width: 8.8rem;
+        background: #dc3545;
+        text-align: center;
+        margin-left: 1rem;
+        font-family: 'Roboto-Regular', sans-serif;
+      }
+    }
+
+    .revenues-create {
+      @include respond(tab-port) {
+        height: 14.1rem;
+      }
+    }
+  }
+
+  .editing-create-content {
+    margin-top: 4rem;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+
+    input {
+      width: 39.7rem;
+      height: 38px;
+      padding: .7rem 1.6rem;
+      font-size: 15px;
+      color: #6c757d;
+      border: .1rem solid #d9d9d9;
+      border-radius: .5rem;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        font-size: 15px;
+        color: #6c757d;
+      }
+    }
+
+    .content-button {
+      margin-top: 2rem;
+
+      .button {
+        width: 8.8rem;
+        background: #198754;
+        font-size: 14px;
+        text-align: center;
+        font-family: 'Roboto-Regular', sans-serif;
+        color: #fff;
+
+        @include respond(phone) {
+          width: 10rem;
+          height: 4.8rem;
+        }
+
+        &:last-child {
+          width: 8.3rem;
+          background: #dc3545;
+          font-size: 14px;
+          text-align: center;
+          color: #fff;
+          font-family: 'Roboto-Regular', sans-serif;
+          margin-left: 1rem;
+
+          @include respond(phone) {
+            width: 10rem;
+            height: 4.8rem;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+<section class="main">
+    <div class="main-content">
+        <div class="main-title">
+            <h1>Home</h1>
+        </div>
+        <div class="tabs">
+            <div class="tabs-header flex items-center flex-wrap gap-0.5">
+                <div class="tabs-header-item active">Today</div>
+                <div class="tabs-header-item">Week</div>
+                <div class="tabs-header-item">Month</div>
+                <div class="tabs-header-item">Year</div>
+                <div class="tabs-header-item">All</div>
+                <div class="tabs-header-item">Interval</div>
+                <div class="tabs-header-interval">
+                    <span>from</span> <input type="text" class="input-interval"
+                                             placeholder="Date" id="dataFromHome">
+                    <span>to</span> <input type="text" class="input-interval"
+                                           placeholder="Date" id="dataToHome">
+                </div>
+            </div>
+            <div class="tabs-content" id="tabs-content">
+                <div class="tabs-content-item flex justify-between">
+                    <div class="flex flex-col items-center item-income items">
+                        <div class="title text-center">
+                            Income
+                        </div>
+                        <canvas id="pieChartIncome" width="423" height="556"></canvas>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="flex flex-col items-center item-expense items">
+                        <div class="title text-center">
+                            Expense
+                        </div>
+                        <canvas id="pieChartExpense" width="423" height="556"></canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

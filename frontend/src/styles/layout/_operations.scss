@@ -1,0 +1,305 @@
+@import "../abstract/_mixin";
+
+.income-expenses {
+  margin: 10rem 0 0 6rem;
+
+  @include respond(tab-port) {
+    margin: 5rem 2rem;
+  }
+
+  .income-expenses-title {
+    line-height: normal;
+    font-size: 40px;
+    color: #052c65;
+
+    @include respond(phone) {
+      font-size: 36px;
+
+    }
+  }
+
+  .income-expenses-content {
+    margin-top: 4rem;
+
+    input, select {
+      width: 39.7rem;
+      height: 3.8rem;
+      padding: .7rem 1.6rem;
+      font-size: 15px;
+      color: #6c757d;
+      border: .1rem solid #d9d9d9;
+      border-radius: .5rem;
+      margin-bottom: 1rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+
+
+      @include respond(phone) {
+        width: 35.7rem;
+        height: 5.8rem;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        font-size: 15px;
+        color: #6c757d;
+      }
+
+    }
+
+
+    .page-create-editing {
+      margin-top: 1rem;
+
+      @include respond(tab-port) {
+        margin-bottom: 3rem;
+      }
+
+      button {
+        width: 8.8rem;
+        text-align: center;
+        font-size: 14px;
+        font-family: 'Roboto-Regular', sans-serif;
+        background: #198754;
+
+        @include respond(phone) {
+          width: 10rem;
+          height: 4.8rem;
+        }
+
+        &:last-child {
+          width: 8.3rem;
+          background: #dc3545;
+          text-align: center;
+          font-size: 14px;
+          margin-left: 1rem;
+          font-family: 'Roboto-Regular', sans-serif;
+
+          @include respond(phone) {
+            width: 10rem;
+            height: 4.8rem;
+          }
+        }
+      }
+    }
+
+
+    .income-expenses-button {
+      a {
+        .income {
+          margin: 0;
+          width: 15.7rem;
+          text-align: center;
+          font-size: 14px;
+          background: #0d6efd;
+          font-family: 'Roboto-Regular', sans-serif;
+        }
+
+        .expenses {
+          width: 15.7rem;
+          background: #dc3545;
+          text-align: center;
+          font-size: 14px;
+          margin-left: 1rem;
+          font-family: 'Roboto-Regular', sans-serif;
+        }
+      }
+
+
+    }
+
+    .tabs {
+      width: 100%;
+      margin-top: 6rem;
+
+      .tabs-header {
+
+        @include respond(tab-port-s) {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .tabs-header-item {
+          width: 10rem;
+          padding: .7rem 1.7rem;
+          cursor: pointer;
+          border: 1px solid #6c757d;
+          margin-right: 20px;
+          border-radius: 4px;
+          color: #6c757d;
+          text-align: center;
+          font-size: 1.6rem;
+          height: 3.7rem;
+
+          @include respond(tab-port-s) {
+            padding: .3rem 1.7rem;
+            font-size: 16px;
+            margin-bottom: .8rem;
+
+            &:nth-child(6) {
+
+            }
+          }
+
+          @include respond(phone) {
+            width: 12rem;
+            height: 4rem;
+            margin-bottom: 1.2rem;
+          }
+
+
+          &.active {
+            color: white;
+            background: #6c757d;
+          }
+        }
+
+        .tabs-header-interval {
+          color: #6c757d;
+          font-size: 16px;
+
+          @include respond(tab-land) {
+            margin-left: 2rem;
+            margin-top: .5rem;
+          }
+
+
+          @include respond(tab-port-s) {
+            margin-bottom: .8rem;
+          }
+
+          @include respond(phone) {
+            margin-bottom: 1.2rem;
+          }
+
+          .input-interval {
+            width: 8.3rem;
+            border: none;
+            &:focus {
+              outline: none;
+            }
+          }
+
+          span {
+            margin-right: .9rem;
+          }
+
+          input:focus {
+            border: none;
+
+          }
+
+          input::placeholder {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .tabs-content {
+        margin-top: 4rem;
+
+
+        .tabs-content-item {
+          font-size: 16px;
+
+          table {
+            min-width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+
+            tr {
+              background: white;
+              border-bottom: 1px solid #dee2e6;
+
+              &:first-child {
+                border-top: 1px solid #dee2e6;
+              }
+            }
+
+            thead {
+
+              tr, th {
+                padding: 1.3rem;
+                text-align: center;
+                letter-spacing: 0.08em;
+                color: #052c65;
+
+                &:first-child {
+                  text-align: start;
+                  width: 15rem;
+                  padding-left: 1.5rem;
+                }
+              }
+            }
+
+            tbody {
+              tr, td {
+                text-align: center;
+                padding: 1.3rem;
+
+                .number-operation {
+                  color: #000;
+                }
+
+                &:first-child .type {
+                  color: #198754;
+                }
+
+                &:last-child .type {
+                  color: #dc3545;
+                }
+
+                .button-svg {
+                  text-align: end;
+
+                  button {
+                    margin-right: 1rem;
+                  }
+                }
+
+                &:last-child {
+                  padding-right: 0;
+                }
+              }
+            }
+          }
+
+          /* Simple CSS for flexbox table on mobile */
+          @media (max-width: 800px) {
+            table {
+              thead {
+                left: -9999px;
+                position: absolute;
+                visibility: hidden;
+              }
+
+              tr {
+                border-bottom: 0;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                margin-bottom: 40px;
+              }
+
+              td {
+                border: 1px solid;
+                margin: 0 -1px -1px 0;
+                padding-top: 35px;
+                position: relative;
+                width: 50%;
+
+                span {
+                  display: block;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

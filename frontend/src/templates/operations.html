@@ -1,0 +1,29 @@
+<section class="income-expenses">
+  <div class="income-expenses-title">
+    Income and Expenses
+  </div>
+  <div class="income-expenses-content flex flex-wrap flex-col">
+    <div class="income-expenses-button">
+      <a href="/#/income-expenses-create"><button type="button" class="button income">Create income</button></a>
+      <a href="/#/income-expenses-create"><button type="button" class="button expenses">Create expense</button></a>
+    </div>
+    <div class="tabs">
+      <div class="tabs-header flex flex-wrap gap-0.5">
+        <div class="tabs-header-item active">Today</div>
+        <div class="tabs-header-item">Week</div>
+        <div class="tabs-header-item">Month</div>
+        <div class="tabs-header-item">Year</div>
+        <div class="tabs-header-item">All</div>
+        <div class="tabs-header-item">Interval</div>
+        <div class="tabs-header-interval">
+          <span>from</span> <input type="text" class="input-interval operations-date"
+                                   placeholder="Date" id="dataFrom">
+          <span>to</span> <input type="text" class="input-interval operations-date"
+                                 placeholder="Date" id="dataTo">
+        </div>
+      </div>
+      <div class="tabs-content" id="tabs-content">
+      </div>
+    </div>
+  </div>
+</section>

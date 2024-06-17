@@ -1,0 +1,264 @@
+@import "../abstract/_mixin";
+
+
+.main-content {
+  margin: 10rem 0 0 6rem;
+
+  @include respond(tab-port-s) {
+    margin: 10rem 2rem 0 2rem;
+  }
+
+
+  @include respond(phone) {
+    margin: 4rem 2rem;
+  }
+
+
+  .main-title {
+    font-size: 40px;
+    color: #052c65;
+  }
+
+  .tabs {
+    width: 100%;
+    margin-top: 6rem;
+
+
+    .tabs-header {
+      @include respond(tab-land) {
+      }
+
+      @include respond(tab-port-s) {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .tabs-header-item {
+        width: 10rem;
+        padding: .7rem 1.7rem;
+        cursor: pointer;
+        border: 1px solid #6c757d;
+        margin-right: 20px;
+        border-radius: 4px;
+        color: #6c757d;
+        text-align: center;
+        font-size: 1.6rem;
+        height: 3.7rem;
+
+        @include respond(tab-land) {
+
+        }
+
+
+        @include respond(tab-port-s) {
+          padding: .3rem 1.7rem;
+          font-size: 16px;
+          margin-bottom: .8rem;
+
+          &:nth-child(6) {
+
+          }
+        }
+
+        @include respond(phone) {
+          width: 12rem;
+          height: 4rem;
+          margin-bottom: 1.2rem;
+        }
+
+
+        &.active {
+          color: white;
+          background: #6c757d;
+        }
+      }
+
+      .tabs-header-interval {
+        color: #6c757d;
+        font-size: 16px;
+
+        @include respond(tab-land) {
+          margin-left: 2rem;
+          margin-top: .5rem;
+        }
+
+
+        @include respond(tab-port-s) {
+          margin-bottom: .8rem;
+        }
+
+        @include respond(phone) {
+          margin-bottom: 1.2rem;
+        }
+
+        input[type=date]::-webkit-inner-spin-button,
+        input[type=date]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+        }
+
+        input[type=date] {
+          -moz-appearance: textfield;
+        }
+
+        .input-interval {
+          width: 6.3rem;
+
+          &:focus {
+            outline: none;
+          }
+        }
+
+        span {
+          margin-right: .9rem;
+        }
+
+        input:focus {
+          border: none;
+
+        }
+
+        input::placeholder {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .tabs-content {
+      margin-top: 14rem;
+      font-size: 7.5rem;
+      position: relative;
+      @include respond(tab-land) {
+        margin-top: 7rem;
+
+      }
+
+      .hr {
+        position: absolute;
+        top: 6.7rem;
+        left: 51.7rem;
+        width: .1rem;
+        height: 45rem;
+        background: #d9d9d9;
+
+        @include respond(Laptop-s) {
+          height: 50rem;
+          left: 48.4rem;
+        }
+
+        @include respond(tab-land) {
+          display: none;
+        }
+
+      }
+
+      .tabs-content-item {
+        min-width: 104rem;
+
+        canvas {
+          max-height: 100%;
+        }
+
+        @include respond(tab-land) {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        @include respond(Laptop-s) {
+          min-width: 0;
+        }
+
+        .item-revenues {
+          margin-left: 2.4rem;
+
+
+        }
+
+        .items {
+          @include respond(tab-land) {
+            margin: 0;
+
+            &:first-child {
+              margin-bottom: 5rem;
+            }
+
+            &:last-child {
+              padding-top: 4rem;
+              margin-bottom: 4rem;
+              border-top: 1px solid #d9d9d9;
+            }
+          }
+
+          .title {
+            font-size: 28px;
+            color: #290661;
+          }
+
+          .graph-item {
+            display: flex;
+
+            @include respond(phone) {
+              flex-wrap: wrap;
+              justify-content: center;
+
+            }
+
+
+            .graph-items {
+              margin-top: 2rem;
+              display: flex;
+              align-items: center;
+              font-size: 12px;
+              color: #000000;
+              margin-right: 1rem;
+
+
+              .block-color-graph {
+                width: 3.5rem;
+                height: 10px;
+              }
+
+              .red {
+                background: #dc3545;
+                margin-right: 1rem;
+              }
+
+              .orange {
+                background: #fd7e14;
+                margin-right: 1rem;
+              }
+
+              .yellow {
+                background: #ffc107;
+                margin-right: 1rem;
+              }
+
+              .green {
+                background: #20c997;
+                margin-right: 1rem;
+              }
+
+              .blue {
+                background: #0d6efd;
+                margin-right: 1rem;
+              }
+            }
+          }
+
+          .graph {
+            margin-top: 4rem;
+
+
+            svg {
+              @include respond(phone) {
+                max-width: 100%;
+
+              }
+            }
+
+
+          }
+        }
+      }
+    }
+  }
+}
