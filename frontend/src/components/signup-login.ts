@@ -1,19 +1,34 @@
-import {CustomHttp} from "../services/custom-http.ts";
-import config from "../config/config.ts";
+import {CustomHttp} from "../services/custom-http";
+import config from "../config/config";
 import {Popup} from "./popup";
-import {Auth} from "../services/auth.ts"
+import {Auth} from "../services/auth"
+import {AuthorizationMessageType} from "../types/authorization-message.type";
+import {UserInfoType} from "../types/user-info.type";
 
 export class SignupLogin extends Popup {
-  constructor(page) {
+  readonly userInfo: UserInfoType | null
+  readonly accessToken: string | null
+  readonly page: string
+  readonly fullNameElement: HTMLInputElement | null
+  readonly emailElement: HTMLInputElement | null
+  readonly passwordElement: HTMLInputElement | null
+  readonly repeatPasswordElement: HTMLInputElement | null
+  readonly checkBoxElement: HTMLInputElement | null
+  readonly buttonElementSingUp: HTMLElement | null
+  readonly buttonElementLogin: HTMLElement | null
+  readonly message: AuthorizationMessageType
+
+  constructor(page: string) {
     super()
-    const accessToken = localStorage.getItem(Auth.accessToken)
-    if (accessToken) location.href = "#/"
+    this.userInfo = Auth.getUserInfo()
+    this.accessToken = localStorage.getItem(Auth.accessToken)
+    if (this.accessToken && this.userInfo) location.href = "#/"
     this.page = page
-    this.fullNameElement = document.getElementById('fullName')
-    this.emailElement = document.getElementById('email')
-    this.passwordElement = document.getElementById('password')
-    this.repeatPasswordElement = document.getElementById('checkPassword')
-    this.checkBoxElement = document.getElementById('checked')
+    this.fullNameElement = document.getElementById('fullName') as HTMLInputElement
+    this.emailElement = document.getElementById('email') as HTMLInputElement
+    this.passwordElement = document.getElementById('password') as HTMLInputElement
+    this.repeatPasswordElement = document.getElementById('checkPassword') as HTMLInputElement
+    this.checkBoxElement = document.getElementById('checked') as HTMLInputElement
     this.buttonElementSingUp = document.getElementById("signUp")
     this.buttonElementLogin = document.getElementById("logIn")
     this.message = {
@@ -21,71 +36,85 @@ export class SignupLogin extends Popup {
       error: 'Something went wrong... Try again.',
     }
 
-    if(this.page === 'login') this.buttonElementLogin.addEventListener('click', this.processLogin.bind(this))
-    if(this.page === 'signup') this.buttonElementSingUp.addEventListener('click', this.processSingUp.bind(this))
+    if (this.page === 'login' && this.buttonElementLogin) this.buttonElementLogin.addEventListener('click', this.processLogin.bind(this))
+    if (this.page === 'signup' && this.buttonElementSingUp) this.buttonElementSingUp.addEventListener('click', this.processSingUp.bind(this))
   }
 
-  validateForm() {
-    let isValid = true
-
-    if (this.emailElement.value && this.emailElement.value.match(/^[^ ]+@[^ ]+\.[a-z]{2,3}$/)) {
-      this.emailElement.classList.remove('error-input')
-    } else {
-      this.emailElement.classList.add('error-input')
-      isValid = false;
-    }
-
-
-    if(this.page === 'signup') {
-      if (this.fullNameElement.value && this.fullNameElement.value.match(/^[a-zA-Z\s]+$/)) {
-        this.fullNameElement.classList.remove('error-input')
+  validateForm(): boolean {
+    let isValid: boolean = true
+    if (this.emailElement) {
+      if (this.emailElement.value && this.emailElement.value.match(/^[^ ]+@[^ ]+\.[a-z]{2,3}$/)) {
+        this.emailElement.classList.remove('error-input')
       } else {
-        this.fullNameElement.classList.add('error-input')
-        isValid = false;
-      }
-
-      if (this.passwordElement.value && this.passwordElement.value.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)) {
-        this.passwordElement.classList.remove('error-input')
-      } else {
-        this.passwordElement.classList.add('error-input')
-        isValid = false;
-      }
-
-      if (this.repeatPasswordElement.value && this.repeatPasswordElement.value === this.passwordElement.value) {
-        this.repeatPasswordElement.classList.remove('error-input')
-      } else {
-        this.repeatPasswordElement.classList.add('error-input')
+        this.emailElement.classList.add('error-input')
         isValid = false;
       }
     }
 
-    if(this.page === 'login') {
-      if(!this.checkBoxElement.checked) {
-        this.checkBoxElement.nextElementSibling.style.color = 'red'
-        isValid = false;
+    if (this.fullNameElement) {
+      if (this.page === 'signup') {
+        if (this.fullNameElement.value && this.fullNameElement.value.match(/^[a-zA-Z\s]+$/)) {
+          this.fullNameElement.classList.remove('error-input')
+        } else {
+          this.fullNameElement.classList.add('error-input')
+          isValid = false;
+        }
       }
 
-      if (this.passwordElement.value) {
-        this.passwordElement.classList.remove('error-input')
-      } else {
-        this.passwordElement.classList.add('error-input')
-        isValid = false;
+
+      if (this.passwordElement) {
+        if (this.passwordElement.value && this.passwordElement.value.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)) {
+          this.passwordElement.classList.remove('error-input')
+        } else {
+          this.passwordElement.classList.add('error-input')
+          isValid = false;
+        }
+      }
+
+      if (this.repeatPasswordElement && this.passwordElement) {
+        if (this.repeatPasswordElement.value && this.repeatPasswordElement.value === this.passwordElement.value) {
+          this.repeatPasswordElement.classList.remove('error-input')
+        } else {
+          this.repeatPasswordElement.classList.add('error-input')
+          isValid = false;
+        }
+      }
+    }
+
+    if (this.page === 'login') {
+
+      if (this.checkBoxElement) {
+        if (!this.checkBoxElement.checked) {
+          const nextElement: HTMLElement | null = this.checkBoxElement.nextElementSibling as HTMLElement | null
+          if (nextElement) nextElement.style.color = 'red'
+          isValid = false;
+        }
+      }
+
+      if (this.passwordElement) {
+
+        if (this.passwordElement.value) {
+          this.passwordElement.classList.remove('error-input')
+        } else {
+          this.passwordElement.classList.add('error-input')
+          isValid = false;
+        }
       }
     }
 
     return isValid
   }
 
-  async processSingUp() {
-    if (this.validateForm()) {
+  async processSingUp(): Promise<void> {
+    if (this.validateForm() && this.fullNameElement && this.emailElement && this.passwordElement && this.repeatPasswordElement) {
 
-      const fullName = this.fullNameElement.value
-      const email = this.emailElement.value
-      const password = this.passwordElement.value
-      const checkPassword = this.repeatPasswordElement.value
+      const fullName: string | null = this.fullNameElement.value
+      const email: string | null = this.emailElement.value
+      const password: string | null = this.passwordElement.value
+      const checkPassword: string | null = this.repeatPasswordElement.value
 
-      let first_name = fullName.split(' ')[0]
-      let last_name = fullName.substring(first_name.length).trim()
+      let first_name: string | null = fullName.split(' ')[0]
+      let last_name: string | null = fullName.substring(first_name.length).trim()
       if (last_name === '') last_name = first_name
 
       try {
@@ -100,6 +129,7 @@ export class SignupLogin extends Popup {
 
         if (result) {
           if (result.error) {
+            if(this.popupElement)
             this.popupElement.classList.remove('hide')
             this.popupContent.style.cssText = `
                         height: 10rem;
@@ -168,10 +198,10 @@ export class SignupLogin extends Popup {
             throw new Error(result.message)
           }
 
-          Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken )
+          Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken)
           Auth.setUserInfo({
-            name:result.user.name,
-            lastName:result.user.lastName,
+            name: result.user.name,
+            lastName: result.user.lastName,
             email: email
           })
 

@@ -11,8 +11,14 @@ import {Operations} from "./components/operations";
 import {OperationsCreate} from "./components/operations-create";
 import {OperationsEditing} from "./components/operations-editing";
 import {Logout} from "./components/logout";
+import {RouterType} from "./types/router.type";
 
 export class Router {
+  readonly contentElement: HTMLElement | null
+  readonly contentTitle: HTMLElement | null
+  readonly styles: string
+  private routes: RouterType[]
+
   constructor() {
     this.contentElement = document.getElementById("content")
     this.contentTitle = document.getElementById('title')
@@ -24,7 +30,7 @@ export class Router {
       template: 'templates/main.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Home()
         new Logout()
@@ -35,7 +41,7 @@ export class Router {
       template: 'templates/login.html',
       styles: this.styles,
       layout: false,
-      load: () => {
+      load: (): void => {
         new SignupLogin('login')
       }
     }, {
@@ -44,7 +50,7 @@ export class Router {
       template: 'templates/signup.html',
       styles: this.styles,
       layout: false,
-      load: () => {
+      load: (): void => {
         new SignupLogin('signup')
       }
     }, {
@@ -53,7 +59,7 @@ export class Router {
       template: 'templates/operations.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new Operations()
@@ -65,7 +71,7 @@ export class Router {
       template: 'templates/operations-create.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new OperationsCreate()
@@ -76,7 +82,7 @@ export class Router {
       template: 'templates/operations-editing.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new OperationsEditing()
@@ -87,7 +93,7 @@ export class Router {
       template: 'templates/expense-category.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Expense()
       }
@@ -97,7 +103,7 @@ export class Router {
       template: 'templates/expense-create-category.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new ExpenseCreating()
@@ -108,7 +114,7 @@ export class Router {
       template: 'templates/expense-editing-category.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new ExpenseEditing()
@@ -119,7 +125,7 @@ export class Router {
       template: 'templates/income-category.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new Income()
@@ -131,7 +137,7 @@ export class Router {
       template: 'templates/income-create-category.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new IncomeCreating()
@@ -142,7 +148,7 @@ export class Router {
       template: 'templates/income-editing-category.html',
       layout: 'templates/layout.html',
       styles: this.styles,
-      load: () => {
+      load: (): void => {
         new SideBar()
         new Logout()
         new IncomeEditing()
@@ -151,29 +157,38 @@ export class Router {
     ]
   }
 
-  async startRouter() {
-    const urlRoute = window.location.hash.split("?")[0]
+  async startRouter(): Promise<void> {
+    const urlRoute: string = window.location.hash.split("?")[0]
 
-    const newRoute =
-      this.routes.find(item => item.route === urlRoute)
+    const newRoute: RouterType | undefined =
+      this.routes.find((item: RouterType): boolean => item.route === urlRoute)
 
     if (!newRoute) {
       window.location.href = "#/"
       return
     }
 
+    if (!this.contentTitle || !this.contentElement) {
+      if (urlRoute === '#/') {
+        return
+      } else {
+        window.location.href = "#/"
+        return
+      }
+    }
+
     if (newRoute) {
       this.contentTitle.innerText = newRoute.title
 
       if (newRoute.template) {
-        let contentBlock = this.contentElement
+        let contentBlock: HTMLElement | null = this.contentElement
         if (newRoute.layout) {
           this.contentElement.innerHTML = await fetch(newRoute.layout)
-            .then(response => response.text())
+            .then((response: Response) => response.text())
           contentBlock = document.getElementById('content-layout')
         }
-
-        contentBlock.innerHTML = await fetch(newRoute.template).then(response => response.text())
+        if (contentBlock)
+          contentBlock.innerHTML = await fetch(newRoute.template).then((response: Response) => response.text())
       }
 
       if (newRoute.load && typeof newRoute.load === 'function') {

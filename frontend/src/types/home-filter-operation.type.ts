@@ -1,4 +1,4 @@
-export type array = {
+export type FilterOperationType = {
   amount: number
   category: string
   comment: string
@@ -6,5 +6,3 @@ export type array = {
   id: number
   type: string
 }
-
-export type HomeFilterOperationType = array[];
