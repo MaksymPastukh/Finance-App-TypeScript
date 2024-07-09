@@ -1,5 +1,5 @@
 export type UserInfoType = {
   name: string,
   lastName: string,
-  email: string
+  email: string | undefined
 }

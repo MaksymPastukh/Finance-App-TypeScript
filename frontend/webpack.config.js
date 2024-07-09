@@ -36,9 +36,9 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: "main.ts",
+    filename: "main.js",
     path: path.resolve(__dirname, "dist"),
-    clean: true
+    clean: true,
   },
   devServer: {
     static: ".dist",

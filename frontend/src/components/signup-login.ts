@@ -2,8 +2,11 @@ import {CustomHttp} from "../services/custom-http";
 import config from "../config/config";
 import {Popup} from "./popup";
 import {Auth} from "../services/auth"
-import {AuthorizationMessageType} from "../types/authorization-message.type";
+import {WarningMessageType} from "../types/warning-message.type";
 import {UserInfoType} from "../types/user-info.type";
+import {LoginResponseType} from "../types/login-response.type";
+import {SignupResponseType} from "../types/signup-response.type";
+import {DefaultResponseType} from "../types/default-response.type";
 
 export class SignupLogin extends Popup {
   readonly userInfo: UserInfoType | null
@@ -16,7 +19,9 @@ export class SignupLogin extends Popup {
   readonly checkBoxElement: HTMLInputElement | null
   readonly buttonElementSingUp: HTMLElement | null
   readonly buttonElementLogin: HTMLElement | null
-  readonly message: AuthorizationMessageType
+  readonly message: WarningMessageType
+  private firstName: string | undefined
+  private lastName: string | undefined
 
   constructor(page: string) {
     super()
@@ -40,7 +45,7 @@ export class SignupLogin extends Popup {
     if (this.page === 'signup' && this.buttonElementSingUp) this.buttonElementSingUp.addEventListener('click', this.processSingUp.bind(this))
   }
 
-  validateForm(): boolean {
+  private validateForm(): boolean {
     let isValid: boolean = true
     if (this.emailElement) {
       if (this.emailElement.value && this.emailElement.value.match(/^[^ ]+@[^ ]+\.[a-z]{2,3}$/)) {
@@ -82,7 +87,6 @@ export class SignupLogin extends Popup {
     }
 
     if (this.page === 'login') {
-
       if (this.checkBoxElement) {
         if (!this.checkBoxElement.checked) {
           const nextElement: HTMLElement | null = this.checkBoxElement.nextElementSibling as HTMLElement | null
@@ -92,7 +96,6 @@ export class SignupLogin extends Popup {
       }
 
       if (this.passwordElement) {
-
         if (this.passwordElement.value) {
           this.passwordElement.classList.remove('error-input')
         } else {
@@ -105,91 +108,96 @@ export class SignupLogin extends Popup {
     return isValid
   }
 
-  async processSingUp(): Promise<void> {
-    if (this.validateForm() && this.fullNameElement && this.emailElement && this.passwordElement && this.repeatPasswordElement) {
-
-      const fullName: string | null = this.fullNameElement.value
-      const email: string | null = this.emailElement.value
-      const password: string | null = this.passwordElement.value
-      const checkPassword: string | null = this.repeatPasswordElement.value
-
-      let first_name: string | null = fullName.split(' ')[0]
-      let last_name: string | null = fullName.substring(first_name.length).trim()
-      if (last_name === '') last_name = first_name
+  private async processSingUp(): Promise<void> {
+    if (this.validateForm()) {
+      if (this.fullNameElement) {
+        const fullName: string | null = this.fullNameElement.value
+        let parts: string[] = fullName.split(' ')
+        this.firstName = parts.shift();
+        this.lastName = parts.join(' ');
+      }
 
       try {
-        const result = await CustomHttp.request(config.host + "/signup", "POST", {
-            name: first_name,
-            lastName: last_name,
-            email: email,
-            password: password,
-            passwordRepeat: checkPassword
+        const result: SignupResponseType | DefaultResponseType = await CustomHttp.request(config.host + "/signup", "POST", {
+            name: this.firstName,
+            lastName: this.lastName,
+            email: this.emailElement?.value,
+            password: this.passwordElement?.value,
+            passwordRepeat: this.repeatPasswordElement?.value
           }
         )
 
         if (result) {
-          if (result.error) {
-            if(this.popupElement)
-            this.popupElement.classList.remove('hide')
-            this.popupContent.style.cssText = `
+          if ((result as DefaultResponseType).error !== undefined) {
+
+            this.popupElement?.classList.remove('hide')
+            if (this.popupContent && this.popupTextElement && this.popupButtonElement) {
+              this.popupContent.style.cssText = `
                         height: 10rem;
                     `;
-            this.popupTextElement.textContent = result.message
-            this.popupTextElement.style.color = 'red'
-            this.popupButtonElement.style.display = 'none'
+              this.popupTextElement.textContent = (result as DefaultResponseType).message
+              this.popupTextElement.style.color = 'red'
+              this.popupButtonElement.style.display = 'none'
 
-            setTimeout(() => {
-              this.reset()
-              this.hide()
-              location.href = '#/signup'
-            }, 3000)
+              setTimeout((): void => {
+                this.reset()
+                this.hide()
+                location.href = '#/signup'
+              }, 3000)
+
+            }
+
           } else {
-            this.popupElement.classList.remove('hide')
-            this.popupContent.style.cssText = `
+            this.popupElement?.classList.remove('hide')
+            if (this.popupContent && this.popupTextElement && this.popupButtonElement) {
+              this.popupContent.style.cssText = `
                         height: 13rem;
                     `;
-            this.popupTextElement.textContent = this.message.success
-            this.popupTextElement.style.color = 'green'
-            this.popupButtonElement.style.display = 'none'
+              this.popupTextElement.textContent = this.message.success
+              this.popupTextElement.style.color = 'green'
+              this.popupButtonElement.style.display = 'none'
 
-            setTimeout(() => {
-              this.reset()
-              this.hide()
-              location.href = '#/login'
-            }, 5000)
+              setTimeout((): void => {
+                this.reset()
+                this.hide()
+                location.href = '#/login'
+              }, 5000)
+            }
           }
         }
-      } catch (error) {
-        return error
+      } catch (e) {
+        throw new Error((e as DefaultResponseType).message);
       }
-    } else {
-      console.log('error')
+
     }
   }
 
-  async processLogin() {
-    if (this.validateForm()) {
-      const email = this.emailElement.value
-      const password = this.passwordElement.value
 
+  private async processLogin(): Promise<void> {
+    if (this.validateForm()) {
+      const email: string | undefined = this.emailElement?.value
+      const password: string | undefined = this.passwordElement?.value
       try {
-        // Отправляем данные на бекэнд
-        const result = await CustomHttp.request(config.host + "/login", "POST", {
+        const result: LoginResponseType | DefaultResponseType = await CustomHttp.request(config.host + "/login", "POST", {
           email: email,
           password: password
         })
 
         if (result) {
-          if (result.error || !result.tokens.accessToken || !result.tokens.refreshToken || !result.user.name || !result.user.lastName || !result.user.id) {
-            this.popupElement.classList.remove('hide')
-            this.popupContent.style.cssText = `
+          if ((result as DefaultResponseType).error || !(result as LoginResponseType).tokens.accessToken ||
+            !(result as LoginResponseType).tokens.refreshToken || !(result as LoginResponseType).user.name ||
+            !(result as LoginResponseType).user.lastName || !(result as LoginResponseType).user.id) {
+            this.popupElement?.classList.remove('hide')
+            if (this.popupContent && this.popupTextElement && this.popupButtonElement) {
+              this.popupContent.style.cssText = `
                         height: 10rem;
                     `;
-            this.popupTextElement.textContent = result.message
-            this.popupTextElement.style.color = 'red'
-            this.popupButtonElement.style.display = 'none'
+              this.popupTextElement.textContent = result.message
+              this.popupTextElement.style.color = 'red'
+              this.popupButtonElement.style.display = 'none'
+            }
 
-            setTimeout(() => {
+            setTimeout((): void => {
               this.reset()
               this.hide()
               location.href = '#/login'
@@ -198,18 +206,17 @@ export class SignupLogin extends Popup {
             throw new Error(result.message)
           }
 
-          Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken)
+          Auth.setTokens((result as LoginResponseType).tokens.accessToken, (result as LoginResponseType).tokens.refreshToken)
           Auth.setUserInfo({
-            name: result.user.name,
-            lastName: result.user.lastName,
+            name: (result as LoginResponseType).user.name,
+            lastName: (result as LoginResponseType).user.lastName,
             email: email
           })
 
           location.href = "#/"
-
         }
-      } catch (error) {
-        console.log(error)
+      } catch (e) {
+        throw new Error((e as DefaultResponseType).message);
       }
     }
   }

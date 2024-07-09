@@ -1,4 +1,4 @@
-export type FilterOperationType = {
+export type OperationsArrayType = {
   amount: number
   category: string
   comment: string

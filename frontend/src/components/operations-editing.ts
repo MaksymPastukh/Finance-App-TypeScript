@@ -1,153 +1,184 @@
-import {CustomHttp} from "../services/custom-http.ts";
-import config from "../config/config.ts";
 import {Operations} from "./operations";
-import {GetOperationsFilter} from "../utils/getOperationsFilter.ts";
+import {CustomHttp} from "../services/custom-http";
+import config from "../config/config";
+import {GetOperationsFilter} from "../utils/getOperationsFilter";
+import {OperationsCategoryType} from "../types/operations-category.type";
+import {OperationsArrayType} from "../types/operations-array.type";
+import {UserInfoType} from "../types/user-info.type";
+import {Auth} from "../services/auth";
+import {DefaultResponseType} from "../types/default-response.type";
 
 export class OperationsEditing extends Operations {
+  readonly selectType: HTMLSelectElement | null
+  readonly inputAmount: HTMLInputElement | null
+  readonly inputDate: HTMLInputElement | null
+  readonly inputComment: HTMLInputElement | null
+  readonly selectCategory: HTMLElement | null
+  readonly buttonSaveEditing: HTMLElement | null
+  readonly buttonCancelEditing: HTMLElement | null
+  private arrayEditOptions: OperationsArrayType[] = []
+  private arraySelectIncome: OperationsCategoryType[] = []
+  private arraySelectExpense: OperationsCategoryType[] = []
+  readonly idCategoryOperations: string | null
+
   constructor() {
     super(false);
-    this.selectType = document.getElementById('operations-edit-type')
-    this.inputAmount = document.getElementById('operations-edit-amount')
-    this.inputDate = document.getElementById('operations-edit-date')
-    this.inputComment = document.getElementById('operations-edit-comments')
+    this.selectType = document.getElementById('operations-edit-type') as HTMLSelectElement
+    this.inputAmount = document.getElementById('operations-edit-amount') as HTMLInputElement
+    this.inputDate = document.getElementById('operations-edit-date') as HTMLInputElement
+    this.inputComment = document.getElementById('operations-edit-comments') as HTMLInputElement
     this.selectCategory = document.getElementById('operations-edit-category')
     this.buttonSaveEditing = document.getElementById('save-operations-button')
     this.buttonCancelEditing = document.getElementById('cancel-operations-button')
     this.idCategoryOperations = localStorage.getItem(this.idLocalStorage)
 
-    this.arraySelectIncome = []
-    this.arraySelectExpense = []
-    this.arrayEditOptions = []
-
-    this.buttonSaveEditing.addEventListener('click', this.initOperationsEdit.bind(this));
-    this.buttonCancelEditing.addEventListener('click', () => {
+    this.buttonSaveEditing?.addEventListener('click', this.initOperationsEdit.bind(this));
+    this.buttonCancelEditing?.addEventListener('click', (): void => {
       window.location.href = '/#/income-expenses';
     })
-
 
     this.initEditOptions()
     this.initIncomeCategory()
     this.initExpenseCategory()
   }
 
-  async initEditOptions() {
-    if (this.token) {
-      if (!this.token) location.href = '#/login'
+  private async initEditOptions(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
       try {
-        const result = await CustomHttp.request(config.host + "/operations?period=all")
-
+        const result: OperationsArrayType[] | DefaultResponseType = await CustomHttp.request(config.host + "/operations?period=all")
         if (result) {
-          if (!result) throw new Error('Error')
-          this.arrayEditOptions = result
-          this.arrayEditOptions.forEach(item => {
-            if(item.id === Number(this.idCategoryOperations)) {
-              this.selectType.value = item.type
-              this.optionsEdit = document.createElement("option");
-              this.optionsEdit.value = item.id;
-              this.optionsEdit.text = item.category;
-              this.selectCategory.appendChild(this.optionsEdit);
-              this.inputAmount.value = item.amount
-              this.inputDate.value = item.date
-              this.inputComment.value = item.comment
+          if ((result as DefaultResponseType).error !== undefined) {
+            throw new Error((result as DefaultResponseType).message)
+          }
+
+          this.arrayEditOptions = result as OperationsArrayType[]
+          this.arrayEditOptions.forEach((item: OperationsArrayType): void => {
+            if (item.id === Number(this.idCategoryOperations)) {
+              if (this.selectType) {
+                this.selectType.value = item.type
+              }
+              const optionsEdit: HTMLOptionElement = document.createElement("option");
+              optionsEdit.value = item.id.toString();
+              optionsEdit.text = item.category;
+              this.selectCategory?.appendChild(optionsEdit);
+              if (this.inputAmount) this.inputAmount.value = item.amount.toString()
+              if (this.inputDate) this.inputDate.value = item.date
+              if (this.inputComment) this.inputComment.value = item.comment
             }
           })
         }
       } catch (e) {
-        throw new Error(e)
+        throw new Error((e as DefaultResponseType).message);
       }
     }
   }
 
-  async initIncomeCategory() {
-    try {
-      const result = await CustomHttp.request(config.host + "/categories/income")
-      if (result) {
-        if (!result) throw new Error('Error')
+  private async initIncomeCategory(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
+      try {
+        const result: OperationsCategoryType[] | DefaultResponseType = await CustomHttp.request(config.host + "/categories/income")
+        if (result) {
+          if ((result as DefaultResponseType).error !== undefined) {
+            throw new Error((result as DefaultResponseType).message)
+          }
 
-        this.arraySelectIncome = result
+          this.arraySelectIncome = result as OperationsCategoryType[]
+
+          this.editingChangeSelectType()
+        }
+      } catch (e) {
+        throw new Error((e as DefaultResponseType).message);
+      }
+    }
+  }
+
+  private async initExpenseCategory(): Promise<void> {
+    try {
+      const result: OperationsCategoryType[] | DefaultResponseType = await CustomHttp.request(config.host + "/categories/expense")
+      if (result) {
+        if ((result as DefaultResponseType).error !== undefined) {
+          throw new Error((result as DefaultResponseType).message)
+        }
+
+        this.arraySelectExpense = result as OperationsCategoryType[]
+
         this.editingChangeSelectType()
-        this.editingDateToSelectCategory()
+
       }
     } catch (e) {
-      throw new Error(e)
+      throw new Error((e as DefaultResponseType).message);
     }
-
   }
 
-  async initExpenseCategory() {
-    try {
-      const result = await CustomHttp.request(config.host + "/categories/expense")
-      if (result) {
-        if (!result) throw new Error('Error')
-
-        this.arraySelectExpense = result
-
-        this.editingChangeSelectType()
-        this.editingDateToSelectCategory()
-      }
-    } catch (e) {
-      throw new Error(e)
-    }
-
-  }
-
-
-  async initOperationsEdit() {
-
-    if (this.token && this.idCategoryOperations) {
-      if (!this.token) location.href = "#/login";
-
+  async initOperationsEdit(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) location.href = '#/login'
+    if (this.userToken && userInfo) {
       if (this.idCategoryOperations) {
         try {
-          const result = await CustomHttp.request(config.host + "/operations/" + this.idCategoryOperations, "PUT", {
-            type: this.selectType.value,
-            amount: +this.inputAmount.value,
-            date: GetOperationsFilter.chengeToData(this.inputDate.value),
-            comment: this.inputComment.value,
-            category_id: +this.selectCategory.value
+          const result: DefaultResponseType = await CustomHttp.request(config.host + "/operations/" + this.idCategoryOperations, "PUT", {
+            type: this.selectType?.value,
+            amount: +(this.inputAmount as HTMLInputElement).value,
+            date: GetOperationsFilter.chengeToData((this.inputDate as HTMLInputElement).value),
+            comment: this.inputComment?.value,
+            category_id: +(this.selectCategory as HTMLSelectElement).value
           });
 
           if (result) {
-            if (!result) throw new Error('Error');
+            if ((result as DefaultResponseType).error !== undefined) {
+              throw new Error((result as DefaultResponseType).message)
+            }
 
             localStorage.removeItem(this.idLocalStorage);
 
             window.location.href = '/#/income-expenses';
           }
         } catch (e) {
-          throw new Error(e);
+          throw new Error((e as DefaultResponseType).message);
         }
       }
     }
   }
 
-  editingChangeSelectType() {
-    this.selectType.addEventListener('change', () => {
-      this.selectCategory.innerHTML = "";
+  private editingChangeSelectType(): void {
+    this.selectType?.addEventListener('change', (): void => {
+      if (this.selectCategory) {
+        this.selectCategory.innerHTML = "";
+      }
       this.editingDateToSelectCategory()
     })
   }
 
-  editingDateToSelectCategory() {
-    this.selectTypeElement = this.selectType.options[this.selectType.selectedIndex];
-    this.selectTypeValue = this.selectTypeElement.value;
+  private editingDateToSelectCategory(): void {
+    this.selectTypeElement = this.selectType?.options[this.selectType.selectedIndex];
+    this.selectTypeValue = this.selectTypeElement?.value;
 
     if (this.selectTypeValue === 'income') {
-      if (this.arraySelectIncome !== null)
-        this.arraySelectIncome.forEach(item => {
-          this.options = document.createElement("option");
-          this.options.value = item.id;
-          this.options.text = item.title;
-          this.selectCategory.appendChild(this.options);
-        });
-    } else {
-      if (this.arraySelectIncome !== null)
-        this.arraySelectExpense.forEach(item => {
-          this.options = document.createElement("option");
-          this.options.value = item.id;
-          this.options.text = item.title;
-          this.selectCategory.appendChild(this.options);
-        });
+      this.arraySelectIncome.forEach((item: OperationsCategoryType): void => {
+        const options: HTMLOptionElement = document.createElement("option");
+        options.value = item.id.toString();
+        options.text = item.title;
+        this.selectCategory?.appendChild(options);
+      });
+
+    } else if (this.selectTypeValue === 'expense') {
+      this.arraySelectExpense.forEach((item: OperationsCategoryType): void => {
+        const options: HTMLOptionElement = document.createElement("option");
+        options.value = item.id.toString();
+        options.text = item.title;
+        this.selectCategory?.appendChild(options);
+      });
+
     }
   }
 }

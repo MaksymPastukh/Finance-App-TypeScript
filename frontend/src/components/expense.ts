@@ -1,65 +1,189 @@
-import {Popup} from "./popup.ts";
-import {Auth} from "../services/auth.ts";
-import {CustomHttp} from "../services/custom-http.ts";
-import config from "../config/config.ts";
+import {Popup} from "./popup";
+import {Auth} from "../services/auth";
+import {CustomHttp} from "../services/custom-http";
+import config from "../config/config";
+import {ExpenseArrayType} from "../types/expense-array.type";
+import {UserInfoType} from "../types/user-info.type";
+import {DefaultResponseType} from "../types/default-response.type";
 
 export class Expense extends Popup {
-  constructor(initExtends = true) {
+  readonly expenseCreatingInput: HTMLInputElement | null
+  readonly buttonCreateCreating: HTMLElement | null
+  readonly buttonCancelCreating: HTMLElement | null
+  readonly buttonSaveEditing: HTMLElement | null
+  readonly buttonCancelEditing: HTMLElement | null
+  readonly expenseElements: HTMLElement | null
+  private expenseElement: HTMLElement | null
+  private buttonExpenseDelete: HTMLElement | null
+  private inputSaveExpenseEditing: HTMLInputElement | null
+  private atrributId: string | null
+  readonly idExpense: string
+  private categoryExpense: ExpenseArrayType[] = []
+  readonly userToken: string | null
+  public inputSaveValue: HTMLInputElement | null
+
+
+  constructor() {
     super();
-
+    this.expenseCreatingInput = document.getElementById('input-create-expense') as HTMLInputElement
+    this.buttonCreateCreating = document.getElementById('create-expense-button')
+    this.buttonCancelCreating = document.getElementById('cancel-expense-button')
+    this.buttonSaveEditing = document.getElementById('save-expense-button')
+    this.buttonCancelEditing = document.getElementById('cancel-expense-button')
     this.expenseElements = document.getElementById('expense-items')
+    this.idExpense = 'expense'
     this.expenseElement = null
+    this.inputSaveValue = null
     this.buttonExpenseDelete = null
-    this.inputSaveExpenseEditing = document.getElementById('input-editing-expense')
+    this.inputSaveExpenseEditing = document.getElementById('input-editing-expense') as HTMLInputElement
     this.atrributId = null
-    this.idCategoryExpense = 'idCategory'
-    this.categoryExpense = []
-    this.token = localStorage.getItem(Auth.accessToken)
+    this.userToken = localStorage.getItem(Auth.accessToken)
 
-    if(initExtends) this.initExpenseCategory()
+    this.initExpenseCategory()
+
+    this.buttonCreateCreating?.addEventListener('click', this.initExpenseCreating.bind(this));
+    this.buttonCancelCreating?.addEventListener('click', () => {
+      window.location.href = '/#/expense-category';
+    })
+
+    this.buttonSaveEditing?.addEventListener('click', this.initExpenseEdit.bind(this));
+    this.buttonCancelEditing?.addEventListener('click', () => {
+      window.location.href = '/#/expense-category';
+    })
   }
 
-  async initExpenseCategory() {
-    if (this.token) {
-      if (!this.token) location.href = '#/login'
-      try {
-        const resultExpense = await CustomHttp.request(config.host + "/categories/expense")
-        if (resultExpense) {
-          if (!resultExpense) throw new Error('Error')
 
-          this.categoryExpense = resultExpense
-          this.processExpenseCategory()
+  private async initEditExpenseInput(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
+
+      try {
+        const result: ExpenseArrayType[] | DefaultResponseType = await CustomHttp.request(config.host + "/categories/expense")
+        if (result) {
+          if ((result as DefaultResponseType).error !== undefined) {
+            throw new Error((result as DefaultResponseType).message)
+          }
+          this.categoryExpense = result as ExpenseArrayType[]
+
+          if (this.categoryExpense) this.categoryExpense.forEach((item: ExpenseArrayType): void => {
+            if (item.id === Number(this.atrributId)) {
+              this.inputSaveValue = document.getElementById('input-editing-expense') as HTMLInputElement | null
+              if (this.inputSaveValue) {
+                this.inputSaveValue.value = item.title
+              }
+            }
+          })
         }
       } catch (e) {
-        throw new Error(e)
+        throw new Error((e as DefaultResponseType).message);
       }
     }
   }
 
-  processExpenseCategory() {
+  private async initExpenseEdit(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
+      const getLocalId: string | null = localStorage.getItem(this.idExpense)
+      if (getLocalId) {
+        try {
+          const result = await CustomHttp.request(config.host + "/categories/expense/" + getLocalId, "PUT", {
+            title: this.inputSaveExpenseEditing?.value
+          });
+
+          if (result) {
+            if ((result as DefaultResponseType).error !== undefined) {
+              throw new Error((result as DefaultResponseType).message)
+            }
+
+            localStorage.removeItem(this.idExpense)
+            window.location.href = '/#/expense-category';
+          }
+        } catch (e) {
+          throw new Error((e as DefaultResponseType).message);
+        }
+      }
+    }
+  }
+
+  private async initExpenseCategory(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
+      try {
+        const resultExpense: ExpenseArrayType[] | DefaultResponseType = await CustomHttp.request(config.host + "/categories/expense")
+        if (resultExpense) {
+          if ((resultExpense as DefaultResponseType).error !== undefined) {
+            throw new Error((resultExpense as DefaultResponseType).message)
+          }
+
+          this.categoryExpense = resultExpense as ExpenseArrayType[]
+          this.processExpenseCategory()
+        }
+      } catch (e) {
+        throw new Error((e as DefaultResponseType).message);
+      }
+    }
+  }
+
+  private async initExpenseCreating(): Promise<void> {
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
+      try {
+        const result: DefaultResponseType = await CustomHttp.request(config.host + "/categories/expense/", "POST", {
+          title: this.expenseCreatingInput?.value
+        });
+
+        if (result) {
+          if ((result as DefaultResponseType).error !== undefined) {
+            throw new Error((result as DefaultResponseType).message)
+          }
+          window.location.href = '/#/expense-category';
+        }
+      } catch (e) {
+        throw new Error((e as DefaultResponseType).message);
+      }
+    }
+  }
+
+  private processExpenseCategory(): void {
     if (this.categoryExpense && this.categoryExpense.length) {
-      this.categoryExpense.forEach(item => {
+      this.categoryExpense.forEach((item: ExpenseArrayType): void => {
         this.expenseElement = document.createElement('div')
         this.expenseElement.className = 'expense-item'
-        this.expenseElement.setAttribute('data-id', item.id)
+        this.expenseElement.setAttribute('data-id', item.id.toString())
 
-        const expenseElementTextElement = document.createElement('div')
+        const expenseElementTextElement: HTMLDivElement = document.createElement('div')
         expenseElementTextElement.className = 'expense-item-title'
         expenseElementTextElement.innerText = item.title
 
-        this.buttonEditExpense = document.createElement('button');
-        this.buttonEditExpense.setAttribute('id', 'button-edit')
-        this.buttonEditExpense.classList.add('button', 'edit-category')
-        this.buttonEditExpense.innerText = 'Edit'
+        const buttonEditExpense: HTMLButtonElement = document.createElement('button');
+        buttonEditExpense.setAttribute('id', 'button-edit')
+        buttonEditExpense.classList.add('button', 'edit-category')
+        buttonEditExpense.innerText = 'Edit'
 
         this.buttonExpenseDelete = document.createElement('button')
         this.buttonExpenseDelete.setAttribute('type', 'button');
         this.buttonExpenseDelete.classList.add('button', 'delete');
         this.buttonExpenseDelete.innerText = 'Delete'
 
-        this.expenseElements.appendChild(this.expenseElement)
+        this.expenseElements?.appendChild(this.expenseElement)
         this.expenseElement.appendChild(expenseElementTextElement)
-        this.expenseElement.appendChild(this.buttonEditExpense)
+        this.expenseElement.appendChild(buttonEditExpense)
         this.expenseElement.appendChild(this.buttonExpenseDelete)
       })
 
@@ -68,40 +192,40 @@ export class Expense extends Popup {
       this.editingExpenseCategory()
     }
 
-    const createCategoryElement = document.createElement('a');
+    const createCategoryElement: HTMLAnchorElement = document.createElement('a');
     createCategoryElement.setAttribute('href', '/#/expense-create');
-    const buttonCreateElement = document.createElement('button');
+    const buttonCreateElement: HTMLButtonElement = document.createElement('button');
     buttonCreateElement.setAttribute('type', 'button');
     buttonCreateElement.classList.add('create');
     buttonCreateElement.innerText = '+';
     createCategoryElement.appendChild(buttonCreateElement);
-    this.expenseElements.appendChild(createCategoryElement)
+    this.expenseElements?.appendChild(createCategoryElement)
   }
 
 
-  deleteExpenseCategory() {
-    const deleteExpenseCategory = document.querySelectorAll('.button.delete')
-    deleteExpenseCategory.forEach(itemExpense => {
-      itemExpense.addEventListener('click', async (e) => {
-        let expenseItem = e.target.closest('.expense-item');
+  private deleteExpenseCategory(): void {
+    const deleteExpenseCategory: NodeListOf<Element> = document.querySelectorAll('.button.delete')
+    deleteExpenseCategory.forEach((itemExpense: Element): void => {
+      itemExpense.addEventListener('click', async (e: Event): Promise<void> => {
+        let expenseItem: Element | null = (e.target as HTMLElement).closest('.expense-item');
 
         if (expenseItem) {
           this.atrributId = expenseItem.getAttribute('data-id');
-
-          if(this.atrributId) {
-            this.popupElement.classList.remove('hide')
-            this.popupContent.style.cssText = `
+          if (this.atrributId) {
+            this.popupElement?.classList.remove('hide')
+            if (this.popupContent && this.popupTextElement) {
+              this.popupContent.style.cssText = `
                         height: 15rem;
                         width: 46rem;
                     `;
-            this.popupTextElement.textContent = 'Do you really want to delete the category?'
-            this.popupTextElement.style.color = '#290661'
-            const buttonDelete = document.createElement('button');
+              this.popupTextElement.textContent = 'Do you really want to delete the category?'
+              this.popupTextElement.style.color = '#290661'
+            }
+            const buttonDelete: HTMLButtonElement = document.createElement('button');
             buttonDelete.setAttribute('type', 'button');
             buttonDelete.classList.add('button');
             buttonDelete.textContent = 'Yes, delete it.'
             buttonDelete.style.cssText = `
-      
                         width: 11.1rem;
                         font-size: 14px;
                         background: #198754;
@@ -109,7 +233,7 @@ export class Expense extends Popup {
                         margin-top: 2rem;
                     `;
 
-            const buttonCancel = document.createElement('button');
+            const buttonCancel: HTMLButtonElement = document.createElement('button');
             buttonCancel.setAttribute('type', 'button');
             buttonCancel.classList.add('button');
             buttonCancel.textContent = 'Don\'t delete'
@@ -122,24 +246,26 @@ export class Expense extends Popup {
                         margin-top: 2rem;
                     `;
 
-            this.popupTextElement.append(buttonDelete)
-            this.popupTextElement.append(buttonCancel)
+            this.popupTextElement?.append(buttonDelete)
+            this.popupTextElement?.append(buttonCancel)
 
-            buttonDelete.addEventListener('click', async () => {
+            buttonDelete.addEventListener('click', async (): Promise<void> => {
               try {
-                const result = await CustomHttp.request(config.host + "/categories/expense/" + this.atrributId, "DELETE")
+                const result: DefaultResponseType = await CustomHttp.request(config.host + "/categories/expense/" + this.atrributId, "DELETE")
                 if (result) {
-                  if (!result) throw new Error('Error')
+                  if ((result as DefaultResponseType).error) {
+                    throw new Error((result as DefaultResponseType).message)
+                  }
                   this.reset()
                   this.hide()
                   window.location.reload()
                 }
               } catch (e) {
-                return e
+                throw new Error((e as DefaultResponseType).message);
               }
             })
 
-            buttonCancel.addEventListener('click', () => {
+            buttonCancel.addEventListener('click', (): void => {
               this.reset()
               this.hide()
             })
@@ -149,17 +275,20 @@ export class Expense extends Popup {
     })
   }
 
-  editingExpenseCategory() {
-    const valueExpenseCategory = document.querySelectorAll('.button.edit-category')
-    valueExpenseCategory.forEach(itemExpense => {
-      itemExpense.addEventListener('click', (e) => {
+  private editingExpenseCategory(): void {
+    const valueExpenseCategory: NodeListOf<Element> = document.querySelectorAll('.button.edit-category')
+    valueExpenseCategory.forEach((itemExpense: Element): void => {
+      itemExpense.addEventListener('click', (e: Event): void => {
 
-        let expenseItem = e.target.closest('.expense-item');
-
+        let expenseItem: Element | null = (e.target as HTMLElement).closest('.expense-item');
         if (expenseItem) {
           this.atrributId = expenseItem.getAttribute('data-id');
-          localStorage.setItem(this.idCategoryExpense, this.atrributId);
+          if (this.atrributId) localStorage.setItem(this.idExpense, this.atrributId);
           window.location.href = '/#/expense-edit'
+
+          setTimeout(async (): Promise<void> => {
+            await this.initEditExpenseInput()
+          }, 50);
         }
       })
     })

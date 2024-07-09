@@ -74,12 +74,12 @@ export class Auth {
   }
 
   // Метод записи информации о пользователе
-  static setUserInfo(userInfo: UserInfoType) : void {
+  public static setUserInfo(userInfo: UserInfoType): void {
     localStorage.setItem(this.userInfo, JSON.stringify(userInfo))
   }
 
   // Метод получения информации о пользователе
-  static getUserInfo() : UserInfoType | null {
+  public static getUserInfo(): UserInfoType | null {
     let userInfo: string | null = localStorage.getItem(this.userInfo)
 
     if (userInfo) {

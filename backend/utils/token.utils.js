@@ -10,7 +10,7 @@ class TokenUtils {
             const accessToken = jwt.sign(
                 payload,
                 config.secret,
-                {expiresIn: "15m"}
+                {expiresIn: "50m"}
             );
             const refreshToken = jwt.sign(
                 payload,

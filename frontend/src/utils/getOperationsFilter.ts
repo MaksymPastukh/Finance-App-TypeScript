@@ -29,7 +29,7 @@ export class GetOperationsFilter {
     return url
   }
 
-  private static chengeToData(data: string) {
+  public static chengeToData(data: string): string | undefined {
     if (/^\d{4}-\d{2}-\d{2}$/.test(data)) {
       return data;
     } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(data)) {

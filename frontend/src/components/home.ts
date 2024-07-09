@@ -5,8 +5,8 @@ import {CustomHttp} from "../services/custom-http";
 import {GetOperationsFilter} from "../utils/getOperationsFilter";
 import {HomeChart} from "../types/home-chart.type";
 import {DefaultResponseType} from "../types/default-response.type";
-import {FilterOperationType} from "../types/home-filter-operation.type";
 import {UserInfoType} from "../types/user-info.type";
+import {OperationsArrayType} from "../types/operations-array.type";
 
 export class Home extends Popup {
   readonly headerTabHome: Element | null
@@ -16,9 +16,8 @@ export class Home extends Popup {
   public pieCanvasIncome: HTMLElement | null
   public pieCanvasExpense: HTMLElement | null
   public inputDateType: NodeListOf<Element>
-  readonly token: string | null
-  readonly userInfo: UserInfoType | null = Auth.getUserInfo()
-  private arrayFilter: FilterOperationType[] = []
+  readonly userToken: string | null
+  private arrayFilter: OperationsArrayType[] = []
   readonly oilDataIncome: HomeChart
   readonly oilDataExpense: HomeChart
 
@@ -33,8 +32,7 @@ export class Home extends Popup {
     this.pieCanvasExpense = document.getElementById("pieChartExpense")
     this.inputDateType = document.querySelectorAll(".input-interval")
 
-    this.token = localStorage.getItem(Auth.accessToken)
-    this.userInfo = Auth.getUserInfo()
+    this.userToken = localStorage.getItem(Auth.accessToken)
     this.oilDataIncome = {
       labels: [],
       datasets: [
@@ -68,15 +66,13 @@ export class Home extends Popup {
     if (this.inputDateType) {
       this.inputDateType.forEach((item: Element): void => {
         item.addEventListener("focusin", function (): void {
-          const inputItem: HTMLInputElement = item as HTMLInputElement
-          inputItem.type = 'date';
+          (item as HTMLInputElement).type = 'date';
         })
       });
 
       this.inputDateType.forEach((item: Element): void => {
         item.addEventListener("focusout", function (): void {
-          const inputItem: HTMLInputElement = item as HTMLInputElement
-          inputItem.type = 'date';
+          (item as HTMLInputElement).type = 'date';
         })
       });
     }
@@ -87,10 +83,8 @@ export class Home extends Popup {
   }
 
   private initTabHome(): void {
-    if (this.headerTabHome) {
-
-      this.headerTabHome.addEventListener('click', (e: Event): void => {
-        const target: HTMLElement = (e.target as HTMLElement).closest('.tabs-header-item') as HTMLElement;
+      this.headerTabHome?.addEventListener('click', (e: Event): void => {
+        const target: Element | null = (e.target as HTMLElement).closest('.tabs-header-item');
         if (!target) return;
 
         if (this.tabHome) {
@@ -107,40 +101,38 @@ export class Home extends Popup {
           });
         }
       });
-    }
+
   }
 
-  private getValueTabHome(): string | undefined{
-    if (this.tabHome) {
-      let valueTab
-      this.tabHome.forEach((item: Element): void => {
-        if (item.classList.contains('active')) valueTab = (item as HTMLElement).innerText
-      })
+  private getValueTabHome(): string | undefined {
+    let valueTab
+    this.tabHome?.forEach((item: Element): void => {
+      if (item.classList.contains('active')) valueTab = (item as HTMLElement).innerText
+    })
 
-      return valueTab
-    }
+    return valueTab
   }
 
   private async initDate(): Promise<void> {
     const userInfo: UserInfoType | null = Auth.getUserInfo()
-    if (!this.token && !userInfo) location.href = '#/login'
-    if (this.token && userInfo) {
+    if (!this.userToken && !userInfo) {
+      location.href = '#/login'
+      return
+    }
+    if (this.userToken && userInfo) {
       try {
         setTimeout(async (): Promise<void> => {
-          const result: FilterOperationType[] | DefaultResponseType = await CustomHttp.request(GetOperationsFilter.urlOperationsFilter(this.getValueTabHome(), this.inputDataFromHome?.value, this.inputDataToHome?.value))
+          const result: OperationsArrayType[] | DefaultResponseType = await CustomHttp.request(GetOperationsFilter.urlOperationsFilter(this.getValueTabHome(), this.inputDataFromHome?.value, this.inputDataToHome?.value))
           if (result) {
             if ((result as DefaultResponseType).error !== undefined)
               throw new Error((result as DefaultResponseType).message)
 
-            this.arrayFilter = result as FilterOperationType[]
-
+            this.arrayFilter = result as OperationsArrayType[]
             this.chartJs()
           }
-
-
         }, 100);
-      } catch (error) {
-        return
+      } catch (e) {
+        throw new Error((e as DefaultResponseType).message);
       }
     }
   }
@@ -148,20 +140,20 @@ export class Home extends Popup {
   private chartJs(): void {
     if (!this.arrayFilter) return
 
-    let incomeArr: FilterOperationType[] = this.arrayFilter.filter((item: FilterOperationType): boolean => item.type === 'income');
-    let expenseArr: FilterOperationType[] = this.arrayFilter.filter((item: FilterOperationType): boolean => item.type === 'expense')
+    let incomeArr: OperationsArrayType[] | null = this.arrayFilter.filter((item: OperationsArrayType): boolean => item.type === 'income');
+    let expenseArr: OperationsArrayType[]  | null = this.arrayFilter.filter((item: OperationsArrayType): boolean => item.type === 'expense')
 
     this.oilDataIncome.labels = [];
     this.oilDataIncome.datasets[0].data = [];
     this.oilDataExpense.labels = [];
     this.oilDataExpense.datasets[0].data = [];
 
-    incomeArr.forEach((item: FilterOperationType): void => {
+    incomeArr.forEach((item: OperationsArrayType): void => {
       this.oilDataIncome.labels.push(item.category)
       this.oilDataIncome.datasets[0].data.push(item.amount)
     })
 
-    expenseArr.forEach((item: FilterOperationType): void => {
+    expenseArr.forEach((item: OperationsArrayType): void => {
       this.oilDataExpense.labels.push(item.category)
       this.oilDataExpense.datasets[0].data.push(item.amount)
     })

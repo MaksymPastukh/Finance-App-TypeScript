@@ -1,16 +1,27 @@
-import {CustomHttp} from "../services/custom-http.ts";
-import config from "../config/config.ts";
-import {Auth} from "../services/auth.ts";
+import {CustomHttp} from "../services/custom-http";
+import config from "../config/config";
+import {Auth} from "../services/auth";
 import {Popup} from "./popup";
+import {WarningMessageType} from "../types/warning-message.type";
+import {UserInfoType} from "../types/user-info.type";
+import {BalanceSideBarPutType, BalanceSidebarType} from "../types/balance-sidebar.type";
 
 export class SideBar extends Popup {
+  readonly balanceElement: HTMLElement | null
+  readonly profileElement: HTMLElement | null
+  readonly chengeBalanceElement: HTMLElement | null
+  readonly buttonSave: HTMLButtonElement
+  readonly buttonCancel: HTMLButtonElement
+  readonly message: WarningMessageType
+
+
   constructor() {
     super()
-    this.balanceElement = document.getElementById('amount')
-    this.profilElement = document.getElementById('profile')
-    this.chengeBalanceElement = document.getElementById('change-balance-popup')
     this.buttonSave = document.createElement('button');
     this.buttonCancel = document.createElement('button');
+    this.balanceElement = document.getElementById('amount')
+    this.profileElement = document.getElementById('profile')
+    this.chengeBalanceElement = document.getElementById('change-balance-popup')
     this.message = {
       success: 'The balance amount has been successfully changed.',
       error: 'Please enter numeric value.',
@@ -20,23 +31,26 @@ export class SideBar extends Popup {
     this.popupChangeBalance()
   }
 
-  async init() {
-    const token = localStorage.getItem(Auth.accessToken)
-    const userInfo = Auth.getUserInfo()
+  private async init(): Promise<void> {
+    const token: string | null = localStorage.getItem(Auth.accessToken)
+    const userInfo: UserInfoType | null = Auth.getUserInfo()
 
     if (!userInfo && !token) {
       location.href = "#/login"
+      return
     }
 
     if (token) {
       try {
-        const resultBalance = await CustomHttp.request(config.host + "/balance")
+        const resultBalance: BalanceSidebarType = await CustomHttp.request(config.host + "/balance")
         if (resultBalance) {
           if (resultBalance.error) {
-            throw new Error(resultBalance.error)
+            throw new Error(resultBalance.message)
           }
-          this.balanceElement.innerText = resultBalance.balance
-          this.profilElement.innerText = `${userInfo.name} ${userInfo.lastName}`
+
+
+          if (this.balanceElement) (this.balanceElement as HTMLElement).innerText = resultBalance.balance.toString()
+          if (this.profileElement && userInfo) this.profileElement.innerText = `${userInfo.name} ${userInfo.lastName}`
         }
       } catch (e) {
         console.log(e)
@@ -44,20 +58,21 @@ export class SideBar extends Popup {
     }
   }
 
-  popupChangeBalance() {
-    this.chengeBalanceElement.addEventListener('click', () => {
-      this.popupElement.classList.remove('hide')
-      this.popupTextElement.textContent = 'You have the option of changing the amount'
-      const input = document.createElement('input')
-      input.type = 'text';
-      input.pattern = '[1-9]'
-      input.classList.add('input')
-      this.popupTextElement.append(input)
+  private popupChangeBalance(): void {
+    if (this.chengeBalanceElement) {
+      this.chengeBalanceElement.addEventListener('click', (): void => {
+        this.popupElement?.classList.remove('hide')
+        if (this.popupTextElement) this.popupTextElement.textContent = 'You have the option of changing the amount'
+        const input: HTMLInputElement = document.createElement('input')
+        input.type = 'text';
+        input.pattern = '[1-9]'
+        input.classList.add('input')
+        this.popupTextElement?.append(input)
 
-      this.buttonSave.setAttribute('type', 'button');
-      this.buttonSave.classList.add('button');
-      this.buttonSave.textContent = 'Save'
-      this.buttonSave.style.cssText = `
+        this.buttonSave.setAttribute('type', 'button');
+        this.buttonSave.classList.add('button');
+        this.buttonSave.textContent = 'Save'
+        this.buttonSave.style.cssText = `
       
                         width: 11.1rem;
         font-size: 14px;
@@ -65,11 +80,11 @@ export class SideBar extends Popup {
         font-family: 'Roboto-Regular', sans-serif;
                     `;
 
-      this.popupButtonElement.append(this.buttonSave)
-      this.buttonCancel.setAttribute('type', 'button');
-      this.buttonCancel.classList.add('button');
-      this.buttonCancel.textContent = 'Cancel'
-      this.buttonCancel.style.cssText = `
+        this.popupButtonElement?.append(this.buttonSave)
+        this.buttonCancel.setAttribute('type', 'button');
+        this.buttonCancel.classList.add('button');
+        this.buttonCancel.textContent = 'Cancel'
+        this.buttonCancel.style.cssText = `
       
                         font-family: 'Roboto-Regular', sans-serif;
           font-size: 14px;
@@ -78,35 +93,40 @@ export class SideBar extends Popup {
           background: #dc3545;
                     `;
 
-      this.popupButtonElement.append(this.buttonCancel)
-    })
+        this.popupButtonElement?.append(this.buttonCancel)
+      })
+    }
 
-    this.buttonSave.addEventListener('click', (event) => {
-      let value = document.querySelector('.input').value
-      this.initChange(value)
+    this.buttonSave.addEventListener('click', (): void => {
+      let element: HTMLInputElement | null = document.querySelector('.input')
+      if (element) {
+        const value: string = element.value
+        this.initChange(value)
+      }
     })
 
     this.targetCloseModal()
   }
 
-  async initChange(amount) {
+  private async initChange(amount: string): Promise<void> {
     try {
-      if (isNaN(amount) || amount === '') {
-        this.popupContent.style.cssText = `
+      const num: number = Number(amount);
+      if (isNaN(num) || amount === '') {
+        if (this.popupContent) this.popupContent.style.cssText = `
                         height: 10rem;
                     `;
-        this.popupTextElement.textContent = this.message.error
-        this.popupTextElement.style.color = 'red'
-        this.popupButtonElement.style.display = 'none'
+        if (this.popupTextElement) this.popupTextElement.textContent = this.message.error
+        if (this.popupTextElement) this.popupTextElement.style.color = 'red'
+        if (this.popupButtonElement) this.popupButtonElement.style.display = 'none'
 
-        setTimeout(() => {
+        setTimeout((): void => {
           this.hide()
           this.reset()
         }, 3000)
-        return false
+        return
       }
 
-      const result = await CustomHttp.request(config.host + "/balance", "PUT", {
+      const result: BalanceSideBarPutType = await CustomHttp.request(config.host + "/balance", "PUT", {
         newBalance: amount,
       })
 
@@ -114,7 +134,7 @@ export class SideBar extends Popup {
         if (!result) {
           throw new Error('Error')
         }
-        const button = document.createElement('button')
+        const button: HTMLButtonElement = document.createElement('button')
         button.setAttribute('type', 'button');
         button.classList.add('button');
         button.textContent = 'YES'
@@ -127,21 +147,21 @@ export class SideBar extends Popup {
                         margin-top: 2rem;
                     `;
 
-        this.popupTextElement.append(button)
-        this.popupContent.style.cssText = `
+        this.popupTextElement?.append(button)
+        if (this.popupContent) this.popupContent.style.cssText = `
                         height: 10rem;
                     `;
-        this.popupTextElement.textContent = this.message.success
-        this.popupTextElement.style.color = 'green'
-        this.popupButtonElement.style.display = 'none'
+        if (this.popupTextElement) this.popupTextElement.textContent = this.message.success
+        if (this.popupTextElement) this.popupTextElement.style.color = 'green'
+        if (this.popupButtonElement) this.popupButtonElement.style.display = 'none'
 
-        setTimeout(() => {
+        setTimeout((): void => {
           this.hide()
           window.location.reload()
         }, 3000)
       }
     } catch (e) {
-      throw new Error(e)
+      return console.log(e)
     }
   }
 }

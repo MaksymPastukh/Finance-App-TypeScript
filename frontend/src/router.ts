@@ -2,11 +2,7 @@ import {SignupLogin} from "./components/signup-login";
 import {Home} from "./components/home";
 import {SideBar} from "./components/side-bar";
 import {Income} from "./components/income";
-import {IncomeEditing} from "./components/income-editing";
-import {IncomeCreating} from "./components/income-creating";
 import {Expense} from "./components/expense";
-import {ExpenseEditing} from "./components/expense-editing";
-import {ExpenseCreating} from "./components/expense-creating";
 import {Operations} from "./components/operations";
 import {OperationsCreate} from "./components/operations-create";
 import {OperationsEditing} from "./components/operations-editing";
@@ -63,7 +59,6 @@ export class Router {
         new SideBar()
         new Logout()
         new Operations()
-
       }
     }, {
       route: '#/income-expenses-create',
@@ -106,7 +101,7 @@ export class Router {
       load: (): void => {
         new SideBar()
         new Logout()
-        new ExpenseCreating()
+        new Expense()
       }
     }, {
       route: '#/expense-edit',
@@ -117,7 +112,7 @@ export class Router {
       load: (): void => {
         new SideBar()
         new Logout()
-        new ExpenseEditing()
+        new Expense()
       }
     }, {
       route: '#/income-category',
@@ -129,7 +124,6 @@ export class Router {
         new SideBar()
         new Logout()
         new Income()
-
       }
     }, {
       route: '#/income-create',
@@ -140,7 +134,7 @@ export class Router {
       load: (): void => {
         new SideBar()
         new Logout()
-        new IncomeCreating()
+        new Income()
       }
     }, {
       route: '#/income-edit',
@@ -151,15 +145,14 @@ export class Router {
       load: (): void => {
         new SideBar()
         new Logout()
-        new IncomeEditing()
+        new Income()
       }
     },
     ]
   }
 
-  async startRouter(): Promise<void> {
+  public async startRouter(): Promise<void> {
     const urlRoute: string = window.location.hash.split("?")[0]
-
     const newRoute: RouterType | undefined =
       this.routes.find((item: RouterType): boolean => item.route === urlRoute)
 
